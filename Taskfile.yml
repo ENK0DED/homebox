@@ -10,12 +10,12 @@ tasks:
     desc: Install development dependencies
     cmds:
       - go install github.com/swaggo/swag/cmd/swag@latest
-      - cd backend && go mod tidy
-      - cd frontend && pnpm install --shamefully-hoist
+      - cd packages/backend && go mod tidy
+      - pnpm install -r --shamefully-hoist
 
   swag:
     desc: Generate swagger docs
-    dir: backend/app/api/static/
+    dir: packages/backend/app/api/static/
     vars:
       API: "../"
       INTERNAL: "../../../internal"
@@ -24,10 +24,10 @@ tasks:
       - swag fmt --dir={{ .API }}
       - swag init --dir={{ .API }},{{ .INTERNAL }}/core/services,{{ .INTERNAL }}/data/repo --parseDependency
     sources:
-      - "./backend/app/api/**/*"
-      - "./backend/internal/data/**"
-      - "./backend/internal/core/services/**/*"
-      - "./backend/app/tools/typegen/main.go"
+      - "./packages/backend/app/api/**/*"
+      - "./packages/backend/internal/data/**"
+      - "./packages/backend/internal/core/services/**/*"
+      - "./packages/backend/app/tools/typegen/main.go"
 
   typescript-types:
     desc: Generates typescript types from swagger definition
@@ -36,12 +36,12 @@ tasks:
         npx swagger-typescript-api \
           --no-client \
           --modular \
-          --path ./backend/app/api/static/docs/swagger.json \
-          --output ./frontend/lib/api/types
-      - go run ./backend/app/tools/typegen/main.go ./frontend/lib/api/types/data-contracts.ts
+          --path ./packages/backend/app/api/static/docs/swagger.json \
+          --output ./packages/frontend/lib/api/types
+      - go run ./packages/backend/app/tools/typegen/main.go ./packages/frontend/lib/api/types/data-contracts.ts
     sources:
-      - ./backend/app/tools/typegen/main.go
-      - ./backend/app/api/static/docs/swagger.json
+      - ./packages/backend/app/tools/typegen/main.go
+      - ./packages/backend/app/api/static/docs/swagger.json
 
   generate:
     deps:
@@ -49,11 +49,11 @@ tasks:
     cmds:
       - task: swag
       - task: typescript-types
-      - cp ./backend/app/api/static/docs/swagger.json docs/docs/api/openapi-2.0.json
+      - cp ./packages/backend/app/api/static/docs/swagger.json docs/docs/api/openapi-2.0.json
 
   go:run:
     desc: Starts the backend api server (depends on generate task)
-    dir: backend
+    dir: packages/backend
     deps:
       - generate
     cmds:
@@ -62,26 +62,26 @@ tasks:
 
   go:test:
     desc: Runs all go tests using gotestsum - supports passing gotestsum args
-    dir: backend
+    dir: packages/backend
     cmds:
       - gotestsum {{ .CLI_ARGS }} ./...
 
   go:coverage:
     desc: Runs all go tests with -race flag and generates a coverage report
-    dir: backend
+    dir: packages/backend
     cmds:
       - go test -race -coverprofile=coverage.out -covermode=atomic ./app/... ./internal/... ./pkgs/... -v -cover
     silent: true
 
   go:tidy:
     desc: Runs go mod tidy on the backend
-    dir: backend
+    dir: packages/backend
     cmds:
       - go mod tidy
 
   go:lint:
     desc: Runs golangci-lint
-    dir: backend
+    dir: packages/backend
     cmds:
       - golangci-lint run ./...
 
@@ -94,57 +94,53 @@ tasks:
 
   go:build:
     desc: Builds the backend binary
-    dir: backend
+    dir: packages/backend
     cmds:
       - go build -o ../build/backend ./app/api
 
   db:generate:
     desc: Run Entgo.io Code Generation
-    dir: backend/internal/
+    dir: packages/backend/internal/
     cmds:
       - |
         go generate ./...
     sources:
-      - "./backend/internal/data/ent/schema/**/*"
+      - "./packages/backend/internal/data/ent/schema/**/*"
 
   db:migration:
     desc: Runs the database diff engine to generate a SQL migration files
     deps:
       - db:generate
     cmds:
-      - cd backend && go run app/tools/migrations/main.go {{ .CLI_ARGS }}
+      - cd packages/backend && go run app/tools/migrations/main.go {{ .CLI_ARGS }}
 
   ui:watch:
     desc: Starts the vitest test runner in watch mode
-    dir: frontend
     cmds:
-      - pnpm run test:watch
+      - pnpm run --filter @homebox/frontend test:watch
 
   ui:dev:
     desc: Run frontend development server
-    dir: frontend
     cmds:
-      - pnpm dev
+      - pnpm run --filter @homebox/frontend dev
 
   ui:fix:
     desc: Runs prettier and eslint on the frontend
-    dir: frontend
     cmds:
-      - pnpm run lint:fix
+      - pnpm run --filter @homebox/frontend lint:fix
 
   ui:check:
     desc: Runs type checking
-    dir: frontend
     cmds:
-      - pnpm run typecheck
+      - pnpm run --filter @homebox/frontend typecheck
 
   test:ci:
     desc: Runs end-to-end test on a live server (only for use in CI)
     cmds:
-      - cd backend && go build ./app/api
-      - backend/api &
+      - cd packages/backend && go build ./app/api
+      - packages/backend/api &
       - sleep 5
-      - cd frontend && pnpm run test:ci
+      - pnpm run --filter @homebox/frontend test:ci
     silent: true
 
   pr:

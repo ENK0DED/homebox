@@ -16,14 +16,14 @@
             "type": "go",
             "request": "launch",
             "mode": "debug",
-            "program": "${workspaceRoot}/backend/app/api/",
+            "program": "${workspaceRoot}/packages/backend/app/api/",
             "args": [],
             "env": {
                 "HBOX_DEMO": "true",
                 "HBOX_LOG_LEVEL": "debug",
                 "HBOX_DEBUG_ENABLED": "true",
-                "HBOX_STORAGE_DATA": "${workspaceRoot}/backend/.data",
-                "HBOX_STORAGE_SQLITE_URL": "${workspaceRoot}/backend/.data/homebox.db?_fk=1"
+                "HBOX_STORAGE_DATA": "${workspaceRoot}/packages/backend/.data",
+                "HBOX_STORAGE_SQLITE_URL": "${workspaceRoot}/packages/backend/.data/homebox.db?_fk=1"
             },
         },
         {
@@ -35,12 +35,12 @@
                 "run",
                 "dev"
             ],
-            "cwd": "${workspaceFolder}/frontend",
+            "cwd": "${workspaceFolder}/packages/frontend",
             "serverReadyAction": {
                 "action": "debugWithChrome",
                 "pattern": "Local: http://localhost:([0-9]+)",
                 "uriFormat": "http://localhost:%s",
-                "webRoot": "${workspaceFolder}/frontend"
+                "webRoot": "${workspaceFolder}/packages/frontend"
               }
         }
     ]

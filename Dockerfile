@@ -1,6 +1,6 @@
 
 # Build Nuxt
-FROM node:18-alpine as frontend-builder
+FROM node:23.5.0-alpine3.21 as frontend-builder
 WORKDIR  /app
 RUN npm install -g pnpm
 COPY frontend/package.json frontend/pnpm-lock.yaml ./
@@ -9,7 +9,7 @@ COPY frontend .
 RUN pnpm build
 
 # Build API
-FROM golang:alpine AS builder
+FROM golang:1.23.4-alpine3.21 AS builder
 ARG BUILD_TIME
 ARG COMMIT
 ARG VERSION
@@ -28,7 +28,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
     -v ./app/api/*.go
 
 # Production Stage
-FROM alpine:latest
+FROM alpine:3.21.0
 
 ENV HBOX_MODE=production
 ENV HBOX_STORAGE_DATA=/data/
@@ -44,7 +44,7 @@ LABEL Name=homebox Version=0.0.1
 LABEL org.opencontainers.image.source="https://github.com/hay-kot/homebox"
 EXPOSE 7745
 WORKDIR /app
-VOLUME [ "/data" ]
+VOLUME ["/data"]
 
-ENTRYPOINT [ "/app/api" ]
-CMD [ "/data/config.yml" ]
+ENTRYPOINT ["/app/api"]
+CMD ["/data/config.yml"]

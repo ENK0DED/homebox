@@ -1,0 +1,58 @@
+{
+  "name": "homebox",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "turbo build",
+    "build:docker": "turbo build:docker",
+    "dev:homebox": "concurrently -n homebox-client,homebox-server -c cyan,yellow --restart-tries -1 --restart-after 500 \"pnpm dev:homebox-client\" \"pnpm dev:homebox-server\"",
+    "dev:homebox-client": "cd packages/client && pnpm dev",
+    "dev:homebox-server": "cd packages/server && pnpm dev",
+    "start:homebox": "concurrently -n homebox-client,homebox-server -c cyan,yellow \"pnpm start:homebox-client\" \"pnpm start:homebox-server\"",
+    "start:homebox-client": "cd packages/client && pnpm start",
+    "start:homebox-server": "cd packages/server && pnpm start",
+    "supabase:start": "cd supabase && pnpm dlx supabase start && cd ..",
+    "supabase:gen-types": "cd supabase && pnpm dlx supabase gen types --lang typescript --local > ../packages/client/types/database.types.ts && cd ..",
+    "supabase:backup": "cd supabase && (if not exist backup mkdir backup) && pnpm dlx supabase db dump --local -f supabase/backup/roles.sql --role-only && pnpm dlx supabase db dump --local -f supabase/backup/schema.sql && pnpm dlx supabase db dump --local -f supabase/backup/data.sql --use-copy --data-only && cd ..",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck"
+  },
+  "devDependencies": {
+    "@types/luxon": "^3.4.2",
+    "@types/node": "^22.10.3",
+    "@unocss/eslint-config": "^0.65.3",
+    "eslint": "^9.17.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^18.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-import-resolver-node": "^0.3.9",
+    "eslint-import-resolver-typescript": "^3.7.0",
+    "eslint-plugin-deprecation": "^3.0.0",
+    "eslint-plugin-import": "npm:eslint-plugin-i@^2.29.1",
+    "eslint-plugin-perfectionist": "^4.4.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-regexp": "^2.7.0",
+    "eslint-plugin-unicorn": "^56.0.1",
+    "eslint-plugin-vue": "^9.32.0",
+    "eslint-plugin-vuejs-accessibility": "^2.4.1",
+    "prettier": "^3.4.2",
+    "stylelint": "^16.12.0",
+    "stylelint-config-standard": "^36.0.1",
+    "stylelint-config-standard-vue": "^1.0.0",
+    "stylelint-order": "^6.0.4",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.19.0",
+    "vue-tsc": "^2.2.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "eslint": "$eslint",
+      "eslint-plugin-import": "$eslint-plugin-import",
+      "eslint-plugin-unicorn": "$eslint-plugin-unicorn",
+      "tar": "^7.4.3",
+      "typescript-eslint": "$typescript-eslint"
+    }
+  },
+  "packageManager": "pnpm@9.15.2"
+}
